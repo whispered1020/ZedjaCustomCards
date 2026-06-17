@@ -10,6 +10,7 @@ function s.initial_effect(c)
 	e0:SetProperty(EFFECT_FLAG_UNCOPYABLE)
 	e0:SetCode(EFFECT_SPSUMMON_PROC)
 	e0:SetRange(LOCATION_EXTRA)
+	e0:SetValue(SUMMON_TYPE_SYNCHRO)
 	e0:SetCondition(s.sprcon)
 	e0:SetTarget(s.sprtg)
 	e0:SetOperation(s.sprop)
@@ -81,12 +82,11 @@ end
 function s.sprop(e,tp,eg,ep,ev,re,r,rp,c)
 	local g=e:GetLabelObject()
 	if not g then return end
-	Duel.SendtoGrave(g,REASON_COST)
+	Duel.SendtoGrave(g,REASON_SYNCHRO)
 end
 -- Look at the top 3 cards of your opponent's Deck and rearrange
 function s.syncon(e,tp,eg,ep,ev,re,r,rp)
-    local c=e:GetHandler()
-    return c:IsSummonLocation(LOCATION_EXTRA) and c:IsSummonType(SUMMON_TYPE_SPECIAL)
+	return e:GetHandler():IsSummonType(SUMMON_TYPE_SYNCHRO)
 end
 function s.rearrangetg(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return Duel.IsPlayerCanDiscardDeck(tp,3) end

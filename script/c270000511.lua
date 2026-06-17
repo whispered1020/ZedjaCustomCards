@@ -10,6 +10,7 @@ function s.initial_effect(c)
 	e0:SetProperty(EFFECT_FLAG_UNCOPYABLE)
 	e0:SetCode(EFFECT_SPSUMMON_PROC)
 	e0:SetRange(LOCATION_EXTRA)
+	e0:SetValue(SUMMON_TYPE_SYNCHRO)
 	e0:SetCondition(s.sprcon)
 	e0:SetTarget(s.sprtg)
 	e0:SetOperation(s.sprop)
@@ -40,19 +41,19 @@ end
 
 --
 function s.sprfilter(c)
-	return c:IsFaceup() and c:IsSetCard(0xf16) and c:IsMonster() and c:IsAbleToGraveAsCost()
+	return c:IsFaceup() and c:IsMonster() and c:IsAbleToGraveAsCost()
 end
 function s.sprfilter1(c,tp,g,sc)
 	local lv=c:GetLevel()
 	if c:IsLinkMonster() then lv=c:GetLink() end
 	local g=Duel.GetMatchingGroup(s.sprfilter,tp,LOCATION_MZONE,0,nil)
-	return c:IsSetCard(0xf16) and (c:IsType(TYPE_TUNER) or c:IsLinkMonster())
+	return (c:IsType(TYPE_TUNER) or c:IsLinkMonster())
 		and g:IsExists(s.sprfilter2,1,c,tp,c,sc,lv)
 end
 function s.sprfilter2(c,tp,mc,sc,lv)
 	local sg=Group.FromCards(c,mc)
 	local nlv=c:GetLevel()
-	return lv+nlv==5 and not c:IsType(TYPE_TUNER) and Duel.GetLocationCountFromEx(tp,tp,sg,sc)>0
+	return lv+nlv==5 and c:IsSetCard(0xf16) and not c:IsType(TYPE_TUNER) and Duel.GetLocationCountFromEx(tp,tp,sg,sc)>0
 end
 function s.sprcon(e,c)
 	if c==nil then return true end
@@ -81,7 +82,10 @@ end
 function s.sprop(e,tp,eg,ep,ev,re,r,rp,c)
 	local g=e:GetLabelObject()
 	if not g then return end
-	Duel.SendtoGrave(g,REASON_COST)
+	for tc in g:Iter() do
+    	tc:SetReasonCard(c)
+	end
+	Duel.Release(g,REASON_COST)
 end
 
 --
@@ -89,8 +93,7 @@ function s.spfilter(c,e,tp)
 	return c:IsSetCard(0xf16) and c:IsType(TYPE_MONSTER)
 end
 function s.syncon(e,tp,eg,ep,ev,re,r,rp)
-    local c=e:GetHandler()
-    return c:IsSummonLocation(LOCATION_EXTRA) and c:IsSummonType(SUMMON_TYPE_SPECIAL)
+	return e:GetHandler():IsSummonType(SUMMON_TYPE_SYNCHRO)
 end
 function s.bantg(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return Duel.IsExistingMatchingCard(Card.IsAbleToRemove,tp,LOCATION_DECK,0,5,nil) end

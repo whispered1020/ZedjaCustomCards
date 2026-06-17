@@ -10,6 +10,7 @@ function s.initial_effect(c)
 	e0:SetProperty(EFFECT_FLAG_UNCOPYABLE)
 	e0:SetCode(EFFECT_SPSUMMON_PROC)
 	e0:SetRange(LOCATION_EXTRA)
+	e0:SetValue(SUMMON_TYPE_SYNCHRO)
 	e0:SetCondition(s.sprcon)
 	e0:SetTarget(s.sprtg)
 	e0:SetOperation(s.sprop)
@@ -82,13 +83,15 @@ end
 function s.sprop(e,tp,eg,ep,ev,re,r,rp,c)
 	local g=e:GetLabelObject()
 	if not g then return end
-	Duel.SendtoGrave(g,REASON_COST)
+	for tc in g:Iter() do
+    	tc:SetReasonCard(c)
+	end
+	Duel.Release(g,REASON_COST)
 end
 
 -- Shuffle and draw effect target
 function s.syncon(e,tp,eg,ep,ev,re,r,rp)
-    local c=e:GetHandler()
-    return c:IsSummonLocation(LOCATION_EXTRA) and c:IsSummonType(SUMMON_TYPE_SPECIAL)
+	return e:GetHandler():IsSummonType(SUMMON_TYPE_SYNCHRO)
 end
 function s.tdtarget(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return Duel.IsExistingMatchingCard(s.tdfilter,tp,LOCATION_REMOVED+LOCATION_GRAVE,0,1,nil) end
